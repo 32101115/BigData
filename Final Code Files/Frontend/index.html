@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<title>Mortality Prediction Model</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://sdk.amazonaws.com/js/aws-sdk-2.19.0.min.js"></script>
+<script src="static/js/index.js"></script>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<style>
+.btn {
+  border: none;
+  outline: none;
+  padding: 12px 16px;
+  background-color: rgb(0, 85, 111);
+  font-size: 16px;
+  cursor: pointer;
+  font-family: Arial;
+  color: white;
+}
+
+#myProgress {
+  width: 100%;
+  background-color: #ddd;
+  display: none;
+}
+
+#myBar {
+  width: 10%;
+  height: 30px;
+  background-color: #393dca;
+  text-align: center;
+  line-height: 30px;
+  color: white;
+}
+<style>
+a {
+    color: white;
+}
+</style>
+</style> 
+<body>
+
+<!-- Navbar (sit on top) -->
+<div class="w3-top">
+  <div class="w3-bar w3-white w3-wide w3-padding w3-card">
+    <img src="static/img/caduceus.png" style="width:3%" align="left">
+    <a href="#home" class="w3-bar-item w3-button">Caduceus</a>
+    <!-- Float links to the right. Hide them on small screens -->
+    <div class="w3-right w3-hide-small">
+      <a href="#dashborad" class="w3-bar-item w3-button">Dashboard</a>
+      <a href="#features" class="w3-bar-item w3-button">Feature analysis</a>
+      <a href="#about" class="w3-bar-item w3-button">About</a>
+      <a href="#contact" class="w3-bar-item w3-button">Contact</a>
+    </div>
+  </div>
+</div>
+
+<!-- Header -->
+<header class="w3-display-container w3-content w3-wide" style="max-width:1500px;" id="home">
+  
+  <div class="w3-display-middle w3-margin-top w3-center">
+    <h1 class="w3-xxlarge w3-text-white"><span class="w3-padding w3-black w3-opacity-min"><b>BR</b></span> <span class="w3-hide-small w3-text-light-grey">Architects</span></h1>
+  </div>
+</header>
+
+<!--Dashborad page -->
+<div class="w3-content w3-padding" style="max-width:1564px">
+  <div class="w3-container w3-padding-32"></div>
+  <div class="w3-container w3-padding-32" id="dashborad">
+    <h3 class="w3-border-bottom w3-border-light-grey w3-padding-16">Dashboard</h3>
+  </div>
+
+  <div class="w3-row-padding">
+    <div class="w3-col 13 m6 w3-margin-bottom">
+      <p style="font-weight: bold; font-size: 40px;">Mortality Prediction Model</p>
+      <p style="line-height:200%; font-size: 18px; color:#808080">The objective of the experiment is to determine associations between tissue oxygen extraction and mortality using time-series analysis and machine learning classification models. We also aim to determine how other confounders such as pH, hemoglobin, lactate and temperature impact the mortality and observe patterns in their trends for sepsis patients.</p><br><br>
+
+      <button class="w3-button" style="border-radius: 10px; background-color:#393dca; color:white;"><input name="myFile" id="file-chooser" type="file"></button>
+      <button class="w3-button" style="width:100px; border-radius: 10px; background-color:#393dca; color:white;" onclick="upload();">Upload</button>
+      <button type="submit" class="w3-button" style="width:100px; border-radius: 10px; background-color:#393dca; color:white;" id="analyse" disabled><a href="chart.html" target="_blank")>Analyze</a></button>
+
+      <br></br>
+	  <div id="myProgress">
+	  	<div id="myBar">10%</div>
+	  </div>
+    </div>
+
+    <div class="w3-col 13 m6 w3-margin-bottom">
+      <div class="w3-display-container">
+        <img src="static/img/workflow.png" style="width:100%">
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Page content -->
+<div class="w3-content w3-padding" style="max-width:1564px">
+
+  <!-- Project Section -->
+  <div class="w3-container w3-padding-32" id="features">
+    <h3 class="w3-border-bottom w3-border-light-grey w3-padding-16">Features</h3>
+  </div>
+
+  <div class="w3-row-padding">
+    <div class="w3-third l3 m6 w3-margin-bottom">
+      <div class="w3-display-container">
+        <!--<div class="w3-display-bottomright w3-black w3-padding">Tissue extraction</div> -->
+        <img src="static/img/tissue tendency.png" alt="House" style="width:100%">
+      </div>
+    </div>
+    <div class="w3-third l3 m6 w3-margin-bottom">
+      <div class="w3-display-container">
+        <!--<div class="w3-display-bottomright w3-black w3-padding">pH level</div>-->
+        <img src="static/img/Correlation diagram.png" alt="House" style="width:100%">
+      </div>
+    </div>
+    <div class="w3-third l3 m6 w3-margin-bottom">
+      <div class="w3-display-container">
+        <!--<div class="w3-display-bottomright w3-black w3-padding">Temperature</div>-->
+        <img src="static/img/Correlation matrix.png" alt="House" style="width:100%">
+      </div>
+    </div>
+  </div>
+
+  
+
+  <!-- Contact Section -->
+  <div class="w3-container w3-padding-32" id="contact">
+    <h3 class="w3-border-bottom w3-border-light-grey w3-padding-16">Contact</h3>
+    <p>Lets get in touch and talk about your and our next project.</p>
+    <form action="/action_page.php" target="_blank">
+      <input class="w3-input" type="text" placeholder="Name" required name="Name">
+      <input class="w3-input w3-section" type="text" placeholder="Email" required name="Email">
+      <input class="w3-input w3-section" type="text" placeholder="Subject" required name="Subject">
+      <input class="w3-input w3-section" type="text" placeholder="Comment" required name="Comment">
+      <button class="w3-button w3-black w3-section" type="submit" >
+        <i class="fa fa-paper-plane"></i> SEND MESSAGE
+      </button>
+    </form>
+  </div>
+  
+<!-- End page content -->
+</div>
+
+<!-- Google Map -->
+
+
+<!-- Footer -->
+<footer class="w3-center w3-black w3-padding-16">
+  <p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" title="W3.CSS" target="_blank" class="w3-hover-text-green">w3.css</a></p>
+</footer>
+
+<script>
+
+
+
+</script>
+
+<!--
+To use this code on your website, get a free API key from Google.
+Read more at: https://www.w3schools.com/graphics/google_maps_basic.asp
+-->
+
+</body>
+</html>

@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<head>
+    <meta charset="utf-8">
+    <title>Loading CSV Data with D3</title>
+    <link rel="stylesheet" type="text/css" href="static/css/main.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://canvasjs.com/assets/script/jquery-1.11.1.min.js"></script>
+    <script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <body>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.css">  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.js"></script>
+
+
+    <link src="static/js/modal.js">
+
+</head>
+<style>
+
+body {
+  /*font: 10px sans-serif;*/
+}
+/* for line graph */
+.h2 {
+  font-size: 40px;
+  text-anchor: middle;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+.dot {
+    fill: #ffab00;
+    stroke: #fff;
+}
+/* for pie graph*/
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.arc text {
+  font: 10px sans-serif;
+  text-anchor: middle;
+}
+
+.arc path {
+  stroke: #fff;
+}
+#myModal {
+  margin-left: 250px
+}
+#diagramAppend {
+  margin-left: 100px;
+  width: 50%;
+  padding-right: 100px;
+}
+
+/* for talbe */
+* { 
+    margin: 0; 
+    padding: 0; 
+     }
+     body { 
+     /*font: 14px/1.4 Georgia, Serif; */
+     }
+    #page-wrap {
+    margin: 50px;
+    }
+    p {
+   margin: 20px 0; 
+    }
+
+  /* 
+  Generic Styling, for Desktops/Laptops 
+  */
+  table { 
+    width: 80%; 
+    border-collapse: collapse; 
+  }
+  /* Zebra striping */
+  tr:nth-of-type(odd) { 
+    background: #eee; 
+  }
+  th { 
+    background: #333; 
+    color: white; 
+    font-weight: bold; 
+    cursor: s-resize;
+    background-repeat: no-repeat;
+        background-position: 3% center;
+  }
+  td, th { 
+    padding: 6px; 
+    border: 1px solid #ccc; 
+    text-align: left; 
+  }
+  
+  th.des:after {
+      content: "\21E9";
+    }
+    
+    th.aes:after {
+      content: "\21E7";
+    }
+
+</style>
+<body>
+  <div id="title" align="center">
+  <h2>Number of Records</h2>
+  </div>
+  <div align="center">
+    <svg width="960" height="500"></svg>
+  </div>
+  <script>
+  /****************************************bootstrap modal helper class *************/
+var Modal = function (options) {
+    var $this = this;
+
+    options = options ? options : {};
+    $this.options = {};
+    $this.options.header = options.header !== undefined ? options.header : false;
+    $this.options.footer = options.footer !== undefined ? options.footer : false;
+    $this.options.closeButton = options.closeButton !== undefined ? options.closeButton : true;
+    $this.options.footerCloseButton = options.footerCloseButton !== undefined ? options.footerCloseButton : false;
+    $this.options.id = options.id !== undefined ? options.id : "myModal";
+
+  
+    /**
+     * Append modal window html to body
+     */
+    $this.createModal = function () {
+        $('body').append('<div id="' + $this.options.id + '" class="modal fade"></div>');
+        $($this.selector).append('<div class="modal-dialog custom-modal"><div class="modal-content"></div></div>');
+        var win = $('.modal-content', $this.selector);
+        if ($this.options.header) {
+            win.append('<div class="modal-header"><h4 class="modal-title" lang="de"></h4></div>');
+            if ($this.options.closeButton) {
+                win.find('.modal-header').prepend('<button type="button" class="close" data-dismiss="modal">&times;</button>');
+            }
+        }
+
+        win.append('<div class="modal-body"></div>');
+
+        if ($this.options.footer) {
+            win.append('<div class="modal-footer"></div>');
+            if ($this.options.footerCloseButton) {
+                win.find('.modal-footer').append('<a data-dismiss="modal" href="#" class="btn btn-default" lang="de">' + $this.options.footerCloseButton + '</a>');
+            }
+        }
+    
+    $($this.selector).on('hidden.bs.modal', function (e) {
+      $($this.selector).remove();
+      var ele = document.getElementById("table");
+      ele.style.display = "block";
+    });
+    
+    
+    };
+
+    /**
+     * Set header text. It makes sense only if the options.header is logical true.
+     * @param {String} html New header text.
+     */
+    $this.setHeader = function (html) {
+        $this.window.find('.modal-title').html(html);
+    };
+
+    /**
+     * Set body HTML.
+     * @param {String} html New body HTML
+     */
+    $this.setBody = function (html) {
+        $this.window.find('.modal-body').html(html);
+    };
+
+    /**
+     * Set footer HTML.
+     * @param {String} html New footer HTML
+     */
+    $this.setFooter = function (html) {
+        $this.window.find('.modal-footer').html(html);
+    };
+
+    /**
+     * Return window body element.
+     * @returns {jQuery} The body element
+     */
+    $this.getBody = function () {
+        return $this.window.find('.modal-body');
+    };
+
+    /**
+     * Show modal window
+     */
+    $this.show = function () {
+        $this.window.modal('show');
+    };
+
+    /**
+     * Hide modal window
+     */
+    $this.hide = function () {
+        $this.window.modal('hide');
+    };
+
+    /**
+     * Toggle modal window
+     */
+    $this.toggle = function () {
+        $this.window.modal('toggle');
+    };
+
+    $this.selector = "#" + $this.options.id;
+    if (!$($this.selector).length) {
+        $this.createModal();
+    }
+  
+    $this.window = $($this.selector);
+    $this.setHeader($this.options.header);
+};
+
+/******************************************* END HELPER CLASS ******************/
+  </script>
+  <div id="line"></div>
+  <div id="table" align="center" style="display: block"></div>
+
+<script>
+
+
+var svg = d3.select("svg"),
+    width = +svg.attr("width"),
+    height = +svg.attr("height"),
+    radius = Math.min(width, height) / 2,
+    g = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+var color = d3.scale.ordinal().range(["#4c80d3", "#d18534", "#727282", "#e2a24d", "#8fbce0"]);
+
+var pie = d3.layout.pie()
+    .sort(null)
+    .value(function(d) { return d.number; });
+
+var path = d3.svg.arc()
+    .outerRadius(radius - 10)
+    .innerRadius(0);
+
+var label = d3.svg.arc()
+    .outerRadius(radius+50) //locatino of label
+    .innerRadius(radius+50);
+
+var margin = {top: 20, right: 20, bottom: 30, left: 50},
+    width = 500 - margin.left - margin.right,
+    height = 250 - margin.top - margin.bottom;
+
+//var parseTime = d3.timeParse("%m/%d/%Y %H:%M");
+
+
+d3.csv("/data/pie.csv", function(d) {
+  //console.log(d);
+  d.number = +d.number;
+  return d;
+}, function(error, data) {
+  if (error) throw error;
+
+  var arc = g.selectAll(".arc")
+    .data(pie(data))
+    .enter().append("g")
+      .attr("class", "arc");
+
+  arc.append("path")
+      .attr("d", path)
+      .attr("fill", function(d) { return color(d.data.patient_category); });
+
+  arc.append("text")
+      .attr("transform", function(d) {
+        var _d= label.centroid(d);
+        _d[0] *= 0.6;
+        _d[1] *= 0.6;
+        /*return "translate(" + path.centroid(d) + ")";*/
+        return "translate(" + _d + ")";
+      })
+      .attr("dy", "0.50em")
+      .style("text-anchor", "middle")
+      .style("font-size", "2em")
+      .style("fill", "white")
+      .text(function(d) { return d.data.percentage;});
+
+
+  arc.append("text")
+      .attr("class","arc")
+      .attr("transform", function(d) { return "translate(" + label.centroid(d) + ")"; })
+      .attr("dy", "0.35em")
+      .style("font-size", "20px")
+      .text(function(d) { return d.data.patient_category; })
+      .on("mouseover", function() {
+        d3.select(this).style("fill", "red");
+        //console.log(this);
+      })
+      .on("mouseout", function() {
+        d3.select(this).style("fill", null);
+      })
+      .on("click", function(data) {
+        //clear contents
+        document.getElementById("table").innerHTML = "";
+        //console.log(data.data.patient_category);
+        d3.csv("/data/critical_patients_records.csv", function(error, myData) {
+          if (error) {
+              console.log("Had an error loading file.");
+          }
+          // We'll be using simpler data as values, not objects.
+          var myArray = [];
+
+          myData.forEach(function(d, i){
+              if (data.data.patient_category == d.patient_category) {
+                myArray.push([d.subject_id, d.datetime, d.tissue_extraction, d.temp_fin, d.ph, d.hb, d.lactate, d.avg]);
+              }
+              //lineArr[i]=[d.subject_id, d.datetime, d.avg];
+          });
+          //console.log(myData);
+          //console.log(myArray);
+          // You could also have made the new array with a map function!
+          //using colors and fonts from the UNICEF Style Guide
+          var sortAscending = true;
+          var table = d3.select("#table").append("table");
+          var header = table.append("thead").append("tr");
+          header.selectAll("th")
+                .data(["Patients ID", "Date time", "Tissue extraction", "Temp fin", "PH","HB","Lactate","Prob"])
+                .enter()
+                .append("th")
+                .text(function(d) { return d; })
+                .on('click', function (d) {
+                   header.attr('class', 'header');
+                   
+                   if (sortAscending) {
+                     rows.sort(function(a, b) { return b[d] < a[d]; });
+                     sortAscending = false;
+                     this.className = 'aes';
+                   } else {
+                   rows.sort(function(a, b) { return b[d] > a[d]; });
+                   sortAscending = true;
+                   this.className = 'des';
+                   }
+                   
+                 });
+          var tablebody = table.append("tbody");
+          rows = tablebody
+                  .selectAll("tr")
+                  .data(myArray)
+                  .enter()
+                  .append("tr");
+          cells = rows.selectAll("td")
+              // each row has data associated; we get it and enter it for the cells.
+                  .data(function(d) {
+                      //console.log(d);
+                      return d;
+                  })
+                  .enter()
+                  .append("td")
+                  .text(function(d) {
+                    //console.log(d)
+                      return d;
+                  }).on("click", function(d) {
+                    lineArr = [];
+                    console.log(myArray[0][0]);
+                    xArr = ['x'];
+                    prob = ['prob'];
+                    for (var i = 0; i < myArray.length; i++) {
+                      if (d == myArray[i][0]) {
+                        //lineArr.push([myArray[i][1],myArray[i][7]]);
+                        //console.log("found");
+                        xArr.push(myArray[i][1]);
+                        prob.push(parseFloat(myArray[i][7]));
+                      }
+                    }
+                    console.log(xArr);
+                    console.log(prob);
+                    if (xArr.length > 1) {
+
+                      var ele = document.getElementById("table");
+                      ele.style.display = "none";
+                      // var m = new Modal({
+                      //   id: 'myModal',
+                      //   header: 'Graph',
+                      // });
+                      var m = new Modal({
+                        id: 'myModal',
+                        header: 'Probability of death',
+                      });
+                      m.getBody().html('<div id="diagramAppend"></div>');
+                      
+                      m.show();
+                      //datasets = ['x', 2015-01-29T21:55:43.702900257Z, 2015-01-30T21:55:43.702900257Z, 2015-01-31T21:55:43.702900257Z]
+                      
+                      $('#myModal').on('shown.bs.modal',function() {
+                        var chart = c3.generate({
+                          bindto: '#diagramAppend',
+                          data: {
+                            x: 'x',
+                            xFormat: "%m/%d/%Y %H:%M",
+                            //xFormat: '%Y/%m/%d %H:%M',
+                            //xFormat: '%Y-%m-%dT%H:%M:%S.%LZ',
+                            columns: [
+                              xArr,
+                              prob
+                            ]
+                          },
+                          axis: {
+                            x: {
+                              type: 'timeseries',
+                              tick: {
+                                //xFormat: "%m/%d/%Y %H:%M:%S"
+                                format: "%m/%d/%Y %H:%M",
+                                rotate: 90
+                              }
+                            }
+                          }
+                        });
+                      });
+                      
+                      jQuery(window).trigger('resize');
+                    }
+
+
+                    // if (lineArr.length != 0){
+                    //   console.log("here");
+
+                    //   var x = d3.scaleTime()
+                    //       .range([0, width]);
+
+                    //   var y = d3.scaleLinear()
+                    //       .range([height, 0]);
+
+
+
+                    //   var line = d3.line()
+                    //       .x(function(d) { return x(d.date); })
+                    //       .y(function(d) { return y(d.prob); });
+
+                    //   var svg = d3.select("body").append("svg")
+                    //       .attr("width", width + margin.left + margin.right)
+                    //       .attr("height", height + margin.top + margin.bottom)
+                    //     .append("g")
+                    //       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                    //     var data = lineArr.map(function(d) {
+                    //         console.log(d[0])
+                    //         return {
+                    //            date: parseTime(d[0]),
+                    //            prob: d[1]
+                    //         };
+                            
+                    //     });
+                    //   x.domain(d3.extent(data, function(d) { return d.date; }));
+                    //   y.domain([0,d3.max(data, function(d) { return d.prob; })]);
+
+                    //     svg.append("g")
+                    //         .attr("class", "x axis")
+                    //         .attr("transform", "translate(0," + height + ")")
+                    //         .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%m/%d/%Y %H:%M")))
+                    //         .selectAll("text")  
+                    //         .style("text-anchor", "end")
+                    //         .attr("dx", "-.8em")
+                    //         .attr("dy", ".15em")
+                    //         .attr("transform", "rotate(-65)");
+
+                    //     svg.append("g")
+                    //         .attr("class", "y axis")
+                    //         .call(d3.axisLeft(y))
+                    //       .append("text")
+                    //         .attr("transform", "rotate(-90)")
+                    //         .attr("y", 6)
+                    //         .attr("dy", ".71em")
+                    //         .style("text-anchor", "end")
+                    //         .text("Price ($)");
+
+                    //     svg.append("path")
+                    //         .datum(data)
+                    //         .attr("class", "line")
+                    //         .attr("d", line);
+                    //     // Appends a circle for each datapoint 
+                    //     svg.selectAll(".dot")
+                    //         .data(data)
+                    //       .enter().append("circle") // Uses the enter().append() method
+                    //         .attr("class", "dot") // Assign a class for styling
+                    //         .attr("cx", function(d, i) { return x(d.date) })
+                    //         .attr("cy", function(d) { return y(d.prob) })
+                    //         .attr("r", 5);
+                      
+                    // }
+
+                  });
+        });
+      })
+});
+
+
+
+
+</script>
+</body>
+</html>
